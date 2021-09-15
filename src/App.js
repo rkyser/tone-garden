@@ -32,7 +32,6 @@ class App extends React.Component {
 
     // This binding is necessary to make `this` work in the callback    
     this.appKeyDown = this.appKeyDown.bind(this);  
-    this.activateLasers = this.activateLasers.bind(this);  
   }
 
   appKeyDown(e) {
