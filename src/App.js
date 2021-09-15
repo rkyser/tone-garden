@@ -10,7 +10,7 @@ class App extends React.Component {
     this.synth = new Tone.PolySynth(Tone.Synth).toDestination();
 
     // TODO: make this configurable
-    this.baseOctave = 1;
+    this.baseOctave = 4;
 
     // Setup the keyboard mappings
     this.keyMap = new Map();
