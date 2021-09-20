@@ -1,7 +1,8 @@
 import logo from './logo.svg';
 import './App.css';
 import React from 'react';
-import * as Tone from 'tone'
+import KeyboardKey from './KeyboardKey';
+import * as Tone from 'tone';
 
 class App extends React.Component {
   constructor(props) {
@@ -10,13 +11,14 @@ class App extends React.Component {
     this.synth = new Tone.PolySynth(Tone.Synth).toDestination();
 
     // TODO: make this configurable
-    this.baseOctave = 4;
+    this.baseOctave = 3;
 
     // Setup the keyboard mappings
     this.keyMap = new Map();
     this.keyMap.set("KeyA", "A" + this.baseOctave);
     this.keyMap.set("KeyW", "A#" + this.baseOctave);
     this.keyMap.set("KeyS", "B" + this.baseOctave);
+    this.keyMap.set("KeyE", "B#" + this.baseOctave);
     this.keyMap.set("KeyD", "C" + (this.baseOctave + 1));
     this.keyMap.set("KeyR", "C#" + (this.baseOctave + 1));
     this.keyMap.set("KeyF", "D" + (this.baseOctave + 1));
@@ -34,6 +36,14 @@ class App extends React.Component {
     this.appKeyDown = this.appKeyDown.bind(this);  
   }
 
+  componentDidMount() {
+    document.addEventListener("keydown", this.appKeyDown);
+  }
+
+  componentWillUnmount() {
+    // TODO: remove keydown event
+  }
+
   appKeyDown(e) {
     if (this.keyMap.has(e.code)) {
       const note = this.keyMap.get(e.code);
@@ -43,11 +53,28 @@ class App extends React.Component {
   }
 
   render() {
+
+    const keyboardKeys = Array.from(this.keyMap)
+      .map(([keyName, note]) => {
+        return <KeyboardKey key={keyName} keyName={keyName} note={note} /> 
+      })
+
     return (
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <input onKeyDown={this.appKeyDown}></input>
+
+          <label htmlFor="octave-select">Octave</label>
+          <select id="octave-select">
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+            <option>6</option>
+          </select>
+
+          <div width="100%">{keyboardKeys}</div>
         </header>
       </div>
     );
