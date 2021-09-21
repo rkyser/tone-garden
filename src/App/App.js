@@ -1,7 +1,6 @@
-import logo from './logo.svg';
 import './App.css';
 import React from 'react';
-import KeyboardKey from './KeyboardKey';
+import KeyboardKey from '../Feature/Keyboard/KeyboardKey.js';
 import * as Tone from 'tone';
 
 class App extends React.Component {
@@ -62,8 +61,6 @@ class App extends React.Component {
     return (
       <div className="App">
         <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-
           <label htmlFor="octave-select">Octave</label>
           <select id="octave-select">
             <option>1</option>
@@ -74,7 +71,7 @@ class App extends React.Component {
             <option>6</option>
           </select>
 
-          <div width="100%">{keyboardKeys}</div>
+          <div class="App-keyboard-container">{keyboardKeys}</div>
         </header>
       </div>
     );
