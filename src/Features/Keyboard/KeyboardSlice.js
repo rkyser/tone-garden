@@ -1,36 +1,47 @@
 import { createSlice } from '@reduxjs/toolkit';
+import * as Tone from 'tone';
 
-const baseOctave = 2;
-const keyMap = new Map();
-keyMap.set('KeyA', `A${baseOctave}`);
-keyMap.set('KeyW', `A#${baseOctave}`);
-keyMap.set('KeyS', `B${baseOctave}`);
-keyMap.set('KeyE', `B#${baseOctave}`);
-keyMap.set('KeyD', `C${baseOctave + 1}`);
-keyMap.set('KeyR', `C#${baseOctave + 1}`);
-keyMap.set('KeyF', `D${baseOctave + 1}`);
-keyMap.set('KeyT', `D#${baseOctave + 1}`);
-keyMap.set('KeyG', `E${baseOctave + 1}`);
-keyMap.set('KeyH', `F${baseOctave + 1}`);
-keyMap.set('KeyU', `F#${baseOctave + 1}`);
-keyMap.set('KeyJ', `G${baseOctave + 1}`);
-keyMap.set('KeyI', `G#${baseOctave + 1}`);
-keyMap.set('KeyK', `A${baseOctave + 1}`);
-keyMap.set('KeyO', `A#${baseOctave + 1}`);
-keyMap.set('KeyL', `B${baseOctave + 1}`);
+const keyMapping = (keyCode, note, offset) => ({ keyCode, note, offset });
 
 const keyboardSlice = createSlice({
   name: 'keyboard',
   initialState: {
-    keyMap,
+    keyMap: {
+      KeyA: keyMapping('KeyA', 'A', 0),
+      KeyW: keyMapping('KeyW', 'A#', 0),
+      KeyS: keyMapping('KeyS', 'B', 0),
+      KeyE: keyMapping('KeyE', 'B#', 0),
+      KeyD: keyMapping('KeyD', 'C', 1),
+      KeyR: keyMapping('KeyR', 'C#', 1),
+      KeyF: keyMapping('KeyF', 'D', 1),
+      KeyT: keyMapping('KeyT', 'D#', 1),
+      KeyG: keyMapping('KeyG', 'E', 1),
+      KeyH: keyMapping('KeyH', 'F', 1),
+      KeyU: keyMapping('KeyU', 'F#', 1),
+      KeyJ: keyMapping('KeyJ', 'G', 1),
+      KeyI: keyMapping('KeyI', 'G#', 1),
+      KeyK: keyMapping('KeyK', 'A', 1),
+      KeyO: keyMapping('KeyO', 'A#', 1),
+      KeyL: keyMapping('KeyL', 'B', 1),
+    },
     keysDown: [],
     octave: 2,
+    synth: new Tone.PolySynth(Tone.Synth).toDestination(),
   },
   reducers: {
-    keyDown(state, keyCode) {
+    keyDown(state, action) {
+      const keyCode = action.payload;
       state.keysDown.push(keyCode);
+      const mapping = state.keyMap[keyCode];
+      if (mapping) {
+        const noteWithOctave = `${mapping.note}${state.octave + mapping.offset}`;
+        state.synth.triggerAttackRelease(noteWithOctave, '8n');
+        // eslint-disable-next-line no-console
+        console.log(noteWithOctave);
+      }
     },
-    keyUp(state, keyCode) {
+    keyUp(state, action) {
+      const keyCode = action.payload;
       const index = state.keysDown.indexOf(keyCode);
       if (index > -1) {
         state.keysDown.splice(index, 1);
