@@ -1,16 +1,15 @@
 import './App.css';
 import React from 'react';
 import Keyboard from '../Features/Keyboard/Keyboard';
+import OctaveDropDown from '../Features/Keyboard/OctaveDropDown';
 
-class App extends React.PureComponent {
-  render() {
-    return (
-      <div className="App">
-        <h1>Keyboard</h1>
-        <Keyboard />
-      </div>
-    );
-  }
-}
+const App = () => (
+  <div className="App">
+    <h1>Keyboard</h1>
+    <Keyboard />
+    <h2>Options</h2>
+    <OctaveDropDown />
+  </div>
+);
 
 export default App;

@@ -26,6 +26,7 @@ const keyboardSlice = createSlice({
     },
     keysDown: [],
     octave: 1,
+    octaveOptions: [0, 1, 2, 3, 4, 5],
     synth: new Tone.PolySynth(Tone.AMSynth).toDestination(),
   },
   reducers: {
@@ -55,8 +56,17 @@ const keyboardSlice = createSlice({
         console.log(`RELEASE ${noteWithOctave}`);
       }
     },
+    setOctave(state, action) {
+      const parsedOctave = parseInt(action.payload, 10);
+      if (Number.isNaN(parsedOctave)) {
+        return;
+      }
+      if (state.octaveOptions.includes(parsedOctave)) {
+        state.octave = parsedOctave;
+      }
+    },
   },
 });
 
-export const { keyDown, keyUp } = keyboardSlice.actions;
+export const { keyDown, keyUp, setOctave } = keyboardSlice.actions;
 export default keyboardSlice.reducer;
