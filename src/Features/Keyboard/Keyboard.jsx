@@ -8,8 +8,16 @@ import KeyStrokeListener from '../Common/KeyStrokeListener';
 const Keyboard = () => {
   const dispatch = useDispatch();
   const keyMap = useSelector((state) => state.keyboard.keyMap);
+  const keysDown = useSelector((state) => state.keyboard.keysDown);
   const keyboardKeys = Object.values(keyMap)
-    .map((k) => (<KeyboardKey key={k.keyCode} keyName={k.keyCode} note={k.note} />));
+    .map((k) => (
+      <KeyboardKey
+        key={k.keyCode}
+        keyName={k.keyCode}
+        note={k.note}
+        isDown={keysDown.includes(k.keyCode)}
+      />
+    ));
 
   return (
     <KeyStrokeListener

@@ -25,19 +25,20 @@ const keyboardSlice = createSlice({
       KeyL: keyMapping('KeyL', 'B', 1),
     },
     keysDown: [],
-    octave: 2,
-    synth: new Tone.PolySynth(Tone.Synth).toDestination(),
+    octave: 1,
+    synth: new Tone.PolySynth(Tone.AMSynth).toDestination(),
   },
   reducers: {
     keyDown(state, action) {
       const keyCode = action.payload;
       state.keysDown.push(keyCode);
+
       const mapping = state.keyMap[keyCode];
       if (mapping) {
         const noteWithOctave = `${mapping.note}${state.octave + mapping.offset}`;
-        state.synth.triggerAttackRelease(noteWithOctave, '8n');
+        state.synth.triggerAttack(noteWithOctave, Tone.now());
         // eslint-disable-next-line no-console
-        console.log(noteWithOctave);
+        console.log(`ATTACK ${noteWithOctave}`);
       }
     },
     keyUp(state, action) {
@@ -45,6 +46,13 @@ const keyboardSlice = createSlice({
       const index = state.keysDown.indexOf(keyCode);
       if (index > -1) {
         state.keysDown.splice(index, 1);
+      }
+      const mapping = state.keyMap[keyCode];
+      if (mapping) {
+        const noteWithOctave = `${mapping.note}${state.octave + mapping.offset}`;
+        state.synth.triggerRelease(noteWithOctave, Tone.now());
+        // eslint-disable-next-line no-console
+        console.log(`RELEASE ${noteWithOctave}`);
       }
     },
   },

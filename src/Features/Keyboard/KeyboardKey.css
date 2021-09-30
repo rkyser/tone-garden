@@ -2,5 +2,18 @@
     border-style: solid;
     padding: 1em;
     margin: 1em;
-    background-color: blueviolet;
+    background-color: gray;
+}
+
+.active {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% {
+      background-color: purple;
+    }
+    100% {
+      background-color: palevioletred;
+    }
 }
