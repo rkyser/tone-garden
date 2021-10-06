@@ -11,4 +11,10 @@ parserOptions:
   sourceType: module
 plugins:
   - react
-rules: {}
+rules: {
+  # eslint does not like how state is updated using RTK. After scanning through the following
+  # pages, I added the following rule to disable this linting error.
+  # - https://github.com/reduxjs/redux-toolkit/issues/521
+  # - https://redux-toolkit.js.org/usage/immer-reducers#linting-state-mutations
+  'no-param-reassign': ['error', { props: true, ignorePropertyModificationsFor: ['state'] }]
+}

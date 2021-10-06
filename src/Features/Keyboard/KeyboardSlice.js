@@ -1,8 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit';
 import * as Tone from 'tone';
 
-const keyMapping = (keyCode, note, offset) => ({ keyCode, note, offset });
+const PLAYMODE_CONTINUOUS = 'PLAYMODE_CONTINUOUS';
+const PLAYMODE_TOGGLE = 'PLAYMODE_TOGGLE';
+const PLAYMODE_PLUCK = 'PLAYMODE_PLUCK';
 
+const keyMapping = (keyCode, note, offset) => ({ keyCode, note, offset });
 const keyboardSlice = createSlice({
   name: 'keyboard',
   initialState: {
@@ -26,7 +29,12 @@ const keyboardSlice = createSlice({
     },
     keysDown: [],
     octave: 1,
-    synth: new Tone.PolySynth(Tone.AMSynth).toDestination(),
+    octaveRange: { min: 0, max: 5 },
+    synth: new Tone.PolySynth(Tone.DuoSynth).toDestination(),
+    playmode: {
+      current: PLAYMODE_CONTINUOUS,
+      options: [PLAYMODE_TOGGLE, PLAYMODE_CONTINUOUS, PLAYMODE_PLUCK],
+    },
   },
   reducers: {
     keyDown(state, action) {
@@ -37,8 +45,6 @@ const keyboardSlice = createSlice({
       if (mapping) {
         const noteWithOctave = `${mapping.note}${state.octave + mapping.offset}`;
         state.synth.triggerAttack(noteWithOctave, Tone.now());
-        // eslint-disable-next-line no-console
-        console.log(`ATTACK ${noteWithOctave}`);
       }
     },
     keyUp(state, action) {
@@ -51,12 +57,30 @@ const keyboardSlice = createSlice({
       if (mapping) {
         const noteWithOctave = `${mapping.note}${state.octave + mapping.offset}`;
         state.synth.triggerRelease(noteWithOctave, Tone.now());
-        // eslint-disable-next-line no-console
-        console.log(`RELEASE ${noteWithOctave}`);
+      }
+    },
+    setOctave(state, action) {
+      const parsed = parseInt(action.payload, 10);
+      if (Number.isNaN(parsed)) {
+        return;
+      }
+      if (parsed >= state.octaveRange.min && parsed <= state.octaveRange.max) {
+        state.octave = parsed;
+      }
+    },
+    setPlaymode(state, action) {
+      const playmode = action.payload;
+      if (state.playmode.options.includes(playmode)) {
+        state.playmode.current = playmode;
       }
     },
   },
 });
 
-export const { keyDown, keyUp } = keyboardSlice.actions;
+export const {
+  keyDown,
+  keyUp,
+  setOctave,
+  setPlaymode,
+} = keyboardSlice.actions;
 export default keyboardSlice.reducer;
