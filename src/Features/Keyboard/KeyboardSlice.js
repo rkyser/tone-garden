@@ -29,7 +29,7 @@ const keyboardSlice = createSlice({
     },
     keysDown: [],
     octave: 1,
-    octaveOptions: [0, 1, 2, 3, 4, 5],
+    octaveRange: { min: 0, max: 5 },
     synth: new Tone.PolySynth(Tone.DuoSynth).toDestination(),
     playmode: {
       current: PLAYMODE_CONTINUOUS,
@@ -57,17 +57,15 @@ const keyboardSlice = createSlice({
       if (mapping) {
         const noteWithOctave = `${mapping.note}${state.octave + mapping.offset}`;
         state.synth.triggerRelease(noteWithOctave, Tone.now());
-        // eslint-disable-next-line no-console
-        console.log(`RELEASE ${noteWithOctave}`);
       }
     },
     setOctave(state, action) {
-      const parsedOctave = parseInt(action.payload, 10);
-      if (Number.isNaN(parsedOctave)) {
+      const parsed = parseInt(action.payload, 10);
+      if (Number.isNaN(parsed)) {
         return;
       }
-      if (state.octaveOptions.includes(parsedOctave)) {
-        state.octave = parsedOctave;
+      if (parsed >= state.octaveRange.min && parsed <= state.octaveRange.max) {
+        state.octave = parsed;
       }
     },
     setPlaymode(state, action) {

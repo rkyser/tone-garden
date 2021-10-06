@@ -3,7 +3,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const KeyboardKey = ({ keyName, note, isDown }) => (
-  <div className={`keyboardKey ${isDown ? 'active' : ''}`}>
+  <div className={`keyboard-key ${isDown ? 'active' : ''}`}>
     {keyName}
     -
     {note}

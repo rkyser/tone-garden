@@ -1,19 +1,22 @@
 import './App.css';
 import React from 'react';
 import Keyboard from '../Features/Keyboard/Keyboard';
-import OctaveDropDown from '../Features/Keyboard/OctaveDropDown';
-import KeyboardModeDropDown from '../Features/Keyboard/KeyboardModeDropDown';
+import OctaveSetting from '../Features/Keyboard/OctaveSetting';
+import PlayModeSetting from '../Features/Keyboard/PlayModeSetting';
 
 const App = () => (
-  <div className="with-sidebar">
-    <div>
-      <h2>Options</h2>
-      <OctaveDropDown />
-      <KeyboardModeDropDown />
+  <div className="page-container">
+    <div className="page-header">
+      <h1>🎵 Tone Garden 🎵</h1>
     </div>
-    <div>
-      <h1>Keyboard</h1>
-      <Keyboard />
+    <div className="page-sidebar">
+      <div>
+        <OctaveSetting />
+        <PlayModeSetting />
+      </div>
+      <div>
+        <Keyboard />
+      </div>
     </div>
   </div>
 );
