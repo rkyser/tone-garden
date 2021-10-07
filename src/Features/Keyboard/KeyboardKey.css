@@ -1,12 +1,15 @@
 .keyboard-key {
-    border-style: solid;
-    padding: 1em;
-    margin: 1em;
-    background-color: gray;
+  stroke: black;
+  fill: #F39C6B;
+}
+
+.keyboard-key-label {
+  font-size: 0.7em;
 }
 
 .active {
     animation: pulse 1s infinite;
+    fill: #FF3864;
 }
 
 @keyframes pulse {
