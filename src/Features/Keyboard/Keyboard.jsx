@@ -1,24 +1,19 @@
 import './Keyboard.css';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-// import { useDispatch } from 'react-redux';
-import { keyDown, keyUp } from './KeyboardSlice';
+import {
+  focusLost,
+  keyDown,
+  keyUp,
+} from './KeyboardSlice';
 import KeyboardKey from './KeyboardKey';
 import KeyStrokeListener from '../Common/KeyStrokeListener';
+import WindowEventListener from '../Common/WindowEventListener';
 
 const Keyboard = () => {
   const dispatch = useDispatch();
-  // const keyMap = useSelector((state) => state.keyboard.keyMap);
+  const keyMap = useSelector((state) => state.keyboard.keyMap);
   const keysDown = useSelector((state) => state.keyboard.keysDown);
-  // const keyboardKeys = Object.values(keyMap)
-  //   .map((k) => (
-  //     <KeyboardKey
-  //       key={k.keyCode}
-  //       keyName={k.keyCode}
-  //       note={k.note}
-  //       isDown={keysDown.includes(k.keyCode)}
-  //     />
-  //   ));
 
   const createKey = (width, height, key, code) => ({
     width,
@@ -116,13 +111,17 @@ const Keyboard = () => {
     xKeyOffset = keyGap;
 
     row.forEach((r) => {
+      const actionName = (r.code in keyMap) ? keyMap[r.code].note : '';
+      const disabled = actionName === '';
       keyboardKeys.push(<KeyboardKey
         y={yKeyOffset}
         x={xKeyOffset}
         width={r.width}
         height={r.height}
         keyName={r.key}
+        actionName={actionName}
         isDown={keysDown.includes(r.code)}
+        disabled={disabled}
       />);
 
       // Update xKeyOffset so that the next key is rendered
@@ -139,14 +138,16 @@ const Keyboard = () => {
   });
 
   return (
-    <KeyStrokeListener
-      onKeyUp={(code) => dispatch(keyUp(code))}
-      onKeyDown={(code) => dispatch(keyDown(code))}
-    >
-      <svg viewBox={`0 0 ${svgViewBoxWidth} ${svgViewBoxHeight}`} className="keyboard-svg">
-        {keyboardKeys}
-      </svg>
-    </KeyStrokeListener>
+    <WindowEventListener onBlur={() => dispatch(focusLost())}>
+      <KeyStrokeListener
+        onKeyUp={(code) => dispatch(keyUp(code))}
+        onKeyDown={(code) => dispatch(keyDown(code))}
+      >
+        <svg viewBox={`0 0 ${svgViewBoxWidth} ${svgViewBoxHeight}`} className="keyboard-svg">
+          {keyboardKeys}
+        </svg>
+      </KeyStrokeListener>
+    </WindowEventListener>
   );
 };
 

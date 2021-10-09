@@ -5,9 +5,19 @@
 
 .keyboard-key-label {
   font-size: 0.7em;
+  fill: #EDF2F4;
 }
 
-.active {
+.keyboard-key-action-name {
+  font-size: 1em;
+}
+
+.keyboard-key-disabled {
+  fill: lightgray;
+  stroke: darkgray
+}
+
+.keyboard-key-active {
     animation: pulse 1s infinite;
     fill: #FF3864;
 }

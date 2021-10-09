@@ -8,11 +8,12 @@ const KeyboardKey = ({
   width,
   height,
   keyName,
-  note,
+  actionName,
   isDown,
+  disabled,
 }) => {
-  const noteTextElement = note !== ''
-    ? (<text x={x + (width / 2)} y={y + (height / 2)} dominantBaseline="middle" textAnchor="middle">{note}</text>)
+  const actionNameElement = actionName !== ''
+    ? (<text x={x + (width / 2)} y={y + (height / 2)} dominantBaseline="middle" textAnchor="middle" className="keyboard-key-action-name">{actionName}</text>)
     : '';
 
   return (
@@ -23,16 +24,17 @@ const KeyboardKey = ({
         width={width}
         height={height}
         rx={5}
-        className={`keyboard-key ${isDown ? 'active' : ''}`}
+        className={`keyboard-key ${isDown ? 'keyboard-key-active' : ''} ${disabled ? 'keyboard-key-disabled' : ''}`}
       />
-      <text x={x + 10} y={y + 15} dominantBaseline="middle" textAnchor="left" className="keyboard-key-label">{keyName}</text>
-      {noteTextElement}
+      <text x={x + 5} y={y + 10} dominantBaseline="middle" textAnchor="left" className="keyboard-key-label">{keyName}</text>
+      {actionNameElement}
     </g>
   );
 };
 
 KeyboardKey.defaultProps = {
-  note: '',
+  actionName: '',
+  disabled: false,
 };
 
 KeyboardKey.propTypes = {
@@ -41,8 +43,9 @@ KeyboardKey.propTypes = {
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
   keyName: PropTypes.string.isRequired,
-  note: PropTypes.string,
+  actionName: PropTypes.string,
   isDown: PropTypes.bool.isRequired,
+  disabled: PropTypes.bool,
 };
 
 export default KeyboardKey;
