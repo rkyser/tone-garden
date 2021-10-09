@@ -7,3 +7,5 @@ This is a simple application for playing musical notes.
 1. Clone the repo.
 2. Run `npm install`
 3. Run `npm start`
+
+![screenshot](./screenshot1.png)
