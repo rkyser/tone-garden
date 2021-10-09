@@ -6,14 +6,15 @@ const PLAYMODE_TOGGLE = 'PLAYMODE_TOGGLE';
 const PLAYMODE_PLUCK = 'PLAYMODE_PLUCK';
 
 const keyMapping = (keyCode, note, offset) => ({ keyCode, note, offset });
+
 const keyboardSlice = createSlice({
   name: 'keyboard',
   initialState: {
     keyMap: {
+      KeyQ: keyMapping('KeyQ', 'G#', 0),
       KeyA: keyMapping('KeyA', 'A', 0),
       KeyW: keyMapping('KeyW', 'A#', 0),
       KeyS: keyMapping('KeyS', 'B', 0),
-      KeyE: keyMapping('KeyE', 'B#', 0),
       KeyD: keyMapping('KeyD', 'C', 1),
       KeyR: keyMapping('KeyR', 'C#', 1),
       KeyF: keyMapping('KeyF', 'D', 1),
@@ -26,17 +27,22 @@ const keyboardSlice = createSlice({
       KeyK: keyMapping('KeyK', 'A', 1),
       KeyO: keyMapping('KeyO', 'A#', 1),
       KeyL: keyMapping('KeyL', 'B', 1),
+      Semicolon: keyMapping('Semicolon', 'C', 2),
     },
     keysDown: [],
     octave: 1,
     octaveRange: { min: 0, max: 5 },
-    synth: new Tone.PolySynth(Tone.DuoSynth).toDestination(),
+    synth: new Tone.PolySynth(Tone.FMSynth).toDestination(),
     playmode: {
       current: PLAYMODE_CONTINUOUS,
       options: [PLAYMODE_TOGGLE, PLAYMODE_CONTINUOUS, PLAYMODE_PLUCK],
     },
   },
   reducers: {
+    focusLost(state) {
+      state.keysDown.splice(0, state.keysDown.length);
+      state.synth.releaseAll();
+    },
     keyDown(state, action) {
       const keyCode = action.payload;
       state.keysDown.push(keyCode);
@@ -78,6 +84,7 @@ const keyboardSlice = createSlice({
 });
 
 export const {
+  focusLost,
   keyDown,
   keyUp,
   setOctave,
