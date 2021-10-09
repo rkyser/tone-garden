@@ -14,6 +14,7 @@ const Keyboard = () => {
   const dispatch = useDispatch();
   const keyMap = useSelector((state) => state.keyboard.keyMap);
   const keysDown = useSelector((state) => state.keyboard.keysDown);
+  const toggledAttacks = useSelector((state) => state.keyboard.toggledAttacks);
 
   const createKey = (width, height, key, code) => ({
     width,
@@ -113,14 +114,18 @@ const Keyboard = () => {
     row.forEach((r) => {
       const actionName = (r.code in keyMap) ? keyMap[r.code].note : '';
       const disabled = actionName === '';
+      const isDown = keysDown.includes(r.code)
+        || (toggledAttacks.findIndex((a) => a.keyCode === r.code) >= 0)
+        || false;
       keyboardKeys.push(<KeyboardKey
+        key={`${xKeyOffset}-${yKeyOffset}`}
         y={yKeyOffset}
         x={xKeyOffset}
         width={r.width}
         height={r.height}
         keyName={r.key}
         actionName={actionName}
-        isDown={keysDown.includes(r.code)}
+        isDown={isDown}
         disabled={disabled}
       />);
 

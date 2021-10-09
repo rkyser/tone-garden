@@ -1,11 +1,29 @@
 import { createSlice } from '@reduxjs/toolkit';
 import * as Tone from 'tone';
 
+const INSTRUMENT_FM_SYNTH = 'FM_SYNTH';
+const INSTRUMENT_AM_SYNTH = 'AM_SYNTH';
+const INSTRUMENT_DUO_SYNTH = 'DUO_SYNTH';
 const PLAYMODE_CONTINUOUS = 'PLAYMODE_CONTINUOUS';
 const PLAYMODE_TOGGLE = 'PLAYMODE_TOGGLE';
 const PLAYMODE_PLUCK = 'PLAYMODE_PLUCK';
 
+const setting = (display, value) => ({ display, value });
 const keyMapping = (keyCode, note, offset) => ({ keyCode, note, offset });
+const createInstrument = (instrument) => {
+  switch (instrument) {
+    case INSTRUMENT_FM_SYNTH:
+      return new Tone.PolySynth(Tone.FMSynth).toDestination();
+    case INSTRUMENT_AM_SYNTH:
+      return new Tone.PolySynth(Tone.AMSynth).toDestination();
+    case INSTRUMENT_DUO_SYNTH:
+      return new Tone.PolySynth(Tone.DuoSynth).toDestination();
+    default:
+      // TODO: throw exception?
+      return null;
+  }
+};
+const createToggledAttack = (keyCode, noteWithOctave) => ({ keyCode, noteWithOctave });
 
 const keyboardSlice = createSlice({
   name: 'keyboard',
@@ -30,12 +48,25 @@ const keyboardSlice = createSlice({
       Semicolon: keyMapping('Semicolon', 'C', 2),
     },
     keysDown: [],
-    octave: 1,
+    octave: 2,
     octaveRange: { min: 0, max: 5 },
-    synth: new Tone.PolySynth(Tone.FMSynth).toDestination(),
+    synth: createInstrument(INSTRUMENT_FM_SYNTH),
+    toggledAttacks: [],
     playmode: {
-      current: PLAYMODE_CONTINUOUS,
-      options: [PLAYMODE_TOGGLE, PLAYMODE_CONTINUOUS, PLAYMODE_PLUCK],
+      current: setting('Continuous', PLAYMODE_CONTINUOUS),
+      options: [
+        setting('Toggle', PLAYMODE_TOGGLE),
+        setting('Continuous', PLAYMODE_CONTINUOUS),
+        setting('Pluck', PLAYMODE_PLUCK),
+      ],
+    },
+    instrument: {
+      current: setting('FM Synth', INSTRUMENT_FM_SYNTH),
+      options: [
+        setting('FM Synth', INSTRUMENT_FM_SYNTH),
+        setting('AM Synth', INSTRUMENT_AM_SYNTH),
+        setting('Duo Synth', INSTRUMENT_DUO_SYNTH),
+      ],
     },
   },
   reducers: {
@@ -48,21 +79,60 @@ const keyboardSlice = createSlice({
       state.keysDown.push(keyCode);
 
       const mapping = state.keyMap[keyCode];
-      if (mapping) {
-        const noteWithOctave = `${mapping.note}${state.octave + mapping.offset}`;
-        state.synth.triggerAttack(noteWithOctave, Tone.now());
+      if (!mapping) {
+        return;
+      }
+
+      const noteWithOctave = `${mapping.note}${state.octave + mapping.offset}`;
+      const noteActiveIndex = state.toggledAttacks
+        .findIndex((a) => a.noteWithOctave === noteWithOctave);
+
+      switch (state.playmode.current.value) {
+        case PLAYMODE_TOGGLE:
+          if (noteActiveIndex > -1) {
+            state.synth.triggerRelease(noteWithOctave, Tone.now());
+            state.toggledAttacks.splice(noteActiveIndex, 1);
+          } else {
+            state.synth.triggerAttack(noteWithOctave, Tone.now());
+            state.toggledAttacks.push(createToggledAttack(keyCode, noteWithOctave));
+          }
+          break;
+
+        case PLAYMODE_CONTINUOUS:
+          state.synth.triggerAttack(noteWithOctave, Tone.now());
+          break;
+
+        case PLAYMODE_PLUCK:
+          state.synth.triggerAttackRelease(noteWithOctave, '8n', Tone.now());
+          break;
+
+        default:
+          break;
       }
     },
     keyUp(state, action) {
       const keyCode = action.payload;
-      const index = state.keysDown.indexOf(keyCode);
-      if (index > -1) {
-        state.keysDown.splice(index, 1);
+      const keyDownIndex = state.keysDown.indexOf(keyCode);
+      if (keyDownIndex > -1) {
+        state.keysDown.splice(keyDownIndex, 1);
       }
       const mapping = state.keyMap[keyCode];
-      if (mapping) {
-        const noteWithOctave = `${mapping.note}${state.octave + mapping.offset}`;
-        state.synth.triggerRelease(noteWithOctave, Tone.now());
+      if (!mapping) {
+        return;
+      }
+
+      const noteWithOctave = `${mapping.note}${state.octave + mapping.offset}`;
+
+      switch (state.playmode.current.value) {
+        case PLAYMODE_CONTINUOUS:
+          state.synth.triggerRelease(noteWithOctave, Tone.now());
+          break;
+
+        // Do nothing with these playmodes on keyUp.
+        case PLAYMODE_PLUCK:
+        case PLAYMODE_TOGGLE:
+        default:
+          break;
       }
     },
     setOctave(state, action) {
@@ -70,15 +140,39 @@ const keyboardSlice = createSlice({
       if (Number.isNaN(parsed)) {
         return;
       }
-      if (parsed >= state.octaveRange.min && parsed <= state.octaveRange.max) {
-        state.octave = parsed;
+      if (parsed < state.octaveRange.min || parsed > state.octaveRange.max) {
+        return;
       }
+      state.octave = parsed;
+      state.synth.releaseAll();
+      state.toggledAttacks.splice(0, state.toggledAttacks.length);
     },
     setPlaymode(state, action) {
-      const playmode = action.payload;
-      if (state.playmode.options.includes(playmode)) {
-        state.playmode.current = playmode;
+      const playmodeValue = action.payload;
+      const newSetting = state.playmode.options.find((o) => o.value === playmodeValue);
+      if (!newSetting) {
+        return;
       }
+      if (newSetting === state.playmode.current) {
+        return;
+      }
+      state.playmode.current = newSetting;
+      state.synth.releaseAll();
+      state.toggledAttacks.splice(0, state.toggledAttacks.length);
+    },
+    setInstrument(state, action) {
+      const instrumentValue = action.payload;
+      const newSetting = state.instrument.options.find((o) => o.value === instrumentValue);
+      if (!newSetting) {
+        return;
+      }
+      if (newSetting === state.instrument.current) {
+        return;
+      }
+      state.instrument.current = newSetting;
+      state.synth.dispose();
+      state.synth = createInstrument(newSetting.value);
+      state.toggledAttacks.splice(0, state.toggledAttacks.length);
     },
   },
 });
@@ -89,5 +183,6 @@ export const {
   keyUp,
   setOctave,
   setPlaymode,
+  setInstrument,
 } = keyboardSlice.actions;
 export default keyboardSlice.reducer;
